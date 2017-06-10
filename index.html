@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>
+	BULL'S EYE
+	</title>
+</head>
+<style>
+	#canvas1{border:solid black;border:10%;background-color:lightblue;margin-left:1%;}
+	#btn
+	{
+	margin-top:0.5%;margin-left:5%;cursor:pointer;background-color:red;padding:0.5% 0.5%;border:5%;border:solid black;margin-bottom:2%;border-radius:10%;font-weight:105%;}
+	}
+	#instructions
+	{
+	   
+       margin-bottom:30%;margin-left:15%;   
+       text-align: center;    
+       bottom: 0%; 
+       width: 100%;text-align:left;margin-top:-5%;
+	   color:red;
+    } 
+     #instructions1
+	{
+	   position:fixed; 
+	   margin-top:10%;
+       margin-bottom:0.5%;	   
+       text-align: center;margin-left:15%;   
+       bottom:0%; 
+       width: 100%;text-align:left;font-size:74%;
+	}
+   
+</style>
+<body >
+	<canvas id="canvas1" width="1300%" height="500%">
+	</canvas>
+	<button id="btn" onclick="restart();">START</button>
+	<button id="btn" onclick="end();">END</button>
+	<button id="btn" onclick="restart();">RESTART</button>
+	<p id="instructions"><strong>INSTRUCTIONS TO PLAY</strong></p>
+	<ul id ="instructions1">
+		<li>CLICK ON "START" TO START THE GAME</li>
+		<li>USE <strong>"W" AND "S"</strong> KEYS TO MOVE THE PLAYER <strong> UP AND DOWN</strong></li>
+		<li>PRESS <strong>SPACEBAR</strong> TO <strong>SHOOT</strong></li>
+		<li>PRESS LETTER <strong>"P"</strong>TO <strong>PAUSE THE GAME</strong> AND<strong> PRESS IT AGAIN TO RESUME THE GAME</strong></li>
+		<li>POINTS DISTRIBUTION:INNERMOST CIRCLE:40  SECOND CIRCLE:30  THIRD CIRCLE:20  OUTERMOST:10</li>
+		<li><strong>BUT YOU HAVE ONLY 5 ARROWS</strong></li>
+	</ul>
+	<embed src="music.mp3" autostart="true" loop="true" hidden="true"> 
+<script>
+
+		var canvas = document.getElementById("canvas1"); 
+		var  ctx2 = canvas.getContext("2d");//creating objects to use the properties of canvas
+		var  ctx1 = canvas.getContext("2d");
+		var  ctx3 = canvas.getContext("2d");
+		var player_x=10,player_y=400,player_speed=2;//initiasing variables used for player(shooter)
+		
+		var arrow_initial_x=10,arrow_initial_y=420,arrow_y,r=917,count_of_arrows_shooted=0,points=0,score=0;//initialising variables used for arrow
+		
+		var target_velY = 4,target_PosX = 1050,target_PosY = 400,radius = 10;//initialising variables used for target
+		
+		var pause=false;//setting boolean variable required to pause the game
+		
+	function make_player()//making the player(shooter)
+	{
+		ctx1.clearRect(0,0,300,500);//clearing the area while player is moving
+		ctx1.fillStyle="green";
+		ctx1.beginPath();
+		ctx1.rect(player_x,player_y,50,40);
+		ctx1.closePath();ctx1.fill();
+		make_arrow(arrow_initial_x,player_y+20);//calling make_arrow to make the arrow attached to player always
+	}
+	
+	function shoot_arrow()//for shooting arrow
+	{
+		
+		count_of_arrows_shooted=count_of_arrows_shooted+1,r=r+10;
+		if ((count_of_arrows_shooted)<=5)//condition for maximum number of arrows
+		{
+			if(((player_y+20)>=(target_PosY-40))&&((player_y+20)<=(target_PosY+40)))//if arrow is within the target coverage area then update score
+			{
+				//to find the region of hit and update the score accordingly
+				if ((((player_y+20)>=(target_PosY+30))&&((player_y+20)<=(target_PosY+40)))||(((player_y+20)>=(target_PosY-30))&&((player_y+20)<=(target_PosY-40))))
+				score=score+10;
+				if ((((player_y+20)>=(target_PosY+20))&&((player_y+20)<=(target_PosY+30)))||(((player_y+20)<=(target_PosY-20))&&((player_y+20)>=(target_PosY-30))))
+				score=score+20;
+				if ((((player_y+20)>=(target_PosY+10))&&((player_y+20)<=(target_PosY+20)))||(((player_y+20)<=(target_PosY-10))&&((player_y+20)>=(target_PosY-20))))
+				score=score+30;
+				else
+				if ((((player_y+20)>=(target_PosY))&&((player_y+20)<=(target_PosY+10)))||(((player_y+20)<=(target_PosY))&&((player_y+20)>=(target_PosY-10))))
+				score=score+40;
+			}
+			else
+			score=score+0;//if arrow is outside the target coverage area then score remains same
+	
+			make_arrow(r,player_y+20);
+			setTimeout(clear_arrow,10);
+		}
+		
+		if ((count_of_arrows_shooted)>5)
+		{
+			ctx3.clearRect(100,0,1000,300);
+			setTimeout(end_of_arrows,100);
+		}
+	}
+	function make_arrow(arrow_x,arrow_y1)//for making the arrow in initial position as well as after shoot
+	{
+		ctx2.strokeStyle="green";
+		ctx2.beginPath();
+		ctx2.moveTo(arrow_x,arrow_y1);
+		ctx2.lineTo(arrow_x+80,arrow_y1);
+		ctx2.stroke();
+	}
+	
+	setInterval(make_target,80);
+
+	function make_target()//making the target and updating its position
+	{
+        if (pause)//if game is paused get out of function
+		return;
+		var ctx=canvas.getContext("2d");
+		ctx.clearRect(900,0,700,500);//clearing the area while target is moving
+		ctx.strokeStyle="red";//making the target
+		ctx.beginPath();
+		ctx.arc(target_PosX,target_PosY,30,0,Math.PI*2,false);
+		ctx.arc(target_PosX,target_PosY,20,0,Math.PI*2,false);
+		ctx.arc(target_PosX,target_PosY,40,0,Math.PI*2,false);
+		ctx.arc(target_PosX,target_PosY,10,0,Math.PI*2,false);//x,y,radius,start angle,end angle,clockwise(false)/anti-clockwise(true)
+		ctx.closePath();
+		ctx.stroke();	
+  
+		target_PosY += target_velY;//updating the position of target
+		//checking boundary condition
+		if (target_PosY + radius > 470 || target_PosY - radius < 20) {
+        // change vely to negative to move the target the opposite Ydirection
+        target_velY *= -1;
+    }
+	
+	window.addEventListener("keydown",pressArrowKeys,true);//for recognising the pressing of keys
+	return setInterval(make_player,10);//for moving the player
+	}
+	
+	function pressArrowKeys(event)
+	{
+		switch(event.keyCode)
+		{
+			case 38:player_y = player_y - player_speed;//move the player up using W key
+			break;
+			case 40:player_y = player_y + player_speed;//move the player down using S key
+			break;
+			case 32:shoot_arrow();//spacebar to shoot the arrow
+			break;
+			case 80:pause=!pause//pausing the game using P key
+			break;
+		}
+	}
+	
+	function clear_arrow()//clearing the shot arrow
+	{
+	ctx3.clearRect(100,0,1000,300);
+	}
+	
+	function end_of_arrows()
+	{
+	alert("SORRY ARROWS ARE OVER!!!YOUR SCORE="+score);
+	}
+	function end()//end the game
+	{
+	alert("YOUR GAME WAS ENDED!!!YOUR SCORE="+score);
+	alert("CLICK ON RESTART TO PLAY THE GAME AGAIN");
+	}
+	function restart()
+	{
+    location.reload();//reloading the game
+	}
+	
+</script>
+</body>
+</html>
